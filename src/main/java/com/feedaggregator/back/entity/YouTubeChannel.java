@@ -7,12 +7,14 @@ import javax.persistence.*;
 
 @Data
 @Entity
-@Table(name = "YouTubeChannels")
+@Table(name = "youtubechannels")
 public class YouTubeChannel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private long id;
+    @Column(name = "channelid")
     @NonNull private String channelId;
 
 }

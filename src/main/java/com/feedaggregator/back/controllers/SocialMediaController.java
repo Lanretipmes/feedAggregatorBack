@@ -6,17 +6,14 @@ import com.feedaggregator.back.services.YouTubeChannelService;
 import com.feedaggregator.back.services.YouTubeClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 
 
 @RestController
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://localhost:4200", methods = {RequestMethod.POST, RequestMethod.GET})
 public class SocialMediaController {
 
     private YouTubeClientService youTubeClientService;
@@ -24,8 +21,9 @@ public class SocialMediaController {
     private LinkedList<YouTubeChannel> channels = new LinkedList<>();
 
     @Autowired
-    public SocialMediaController (YouTubeClientService youTubeClientService) {
+    public SocialMediaController (YouTubeClientService youTubeClientService, YouTubeChannelService youTubeChannelService) {
         this.youTubeClientService = youTubeClientService;
+        this.youTubeChannelService = youTubeChannelService;
     }
 
     @GetMapping("/")
@@ -34,7 +32,7 @@ public class SocialMediaController {
         return ResponseEntity.ok("Success");
     }
 
-    @GetMapping("/YTchannels")
+    @GetMapping("/subscription/youtube")
     public ResponseEntity YouTubeChannels() {
         return ResponseEntity.ok(youTubeChannelService.findAll());
     }
@@ -56,8 +54,8 @@ public class SocialMediaController {
         return ResponseEntity.ok(posts);
     }
 
-    @GetMapping("/addYTchannel")
-    public String addYouTubeChannel(@RequestParam(name = "channelId", required = true) String channelId) {
+    @RequestMapping(value = "/subscription/youtube", method = RequestMethod.POST)
+    public String addYouTubeChannel(@RequestBody String channelId) {
         YouTubeChannel newChannel = new YouTubeChannel(channelId);
         youTubeChannelService.save(newChannel);
         channels.add(newChannel);
