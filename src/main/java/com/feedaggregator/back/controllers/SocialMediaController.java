@@ -1,17 +1,32 @@
 package com.feedaggregator.back.controllers;
 
 import com.feedaggregator.back.boundary.YouTubeVideo;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.context.annotation.Bean;
+import com.feedaggregator.back.entity.YouTubeChannel;
+import com.feedaggregator.back.services.YouTubeChannelService;
+import com.feedaggregator.back.services.YouTubeClientService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
 public class SocialMediaController {
+
+    private YouTubeClientService youTubeClientService;
+    private YouTubeChannelService youTubeChannelService;
+    private LinkedList<YouTubeChannel> channels = new LinkedList<>();
+
+    @Autowired
+    public SocialMediaController (YouTubeClientService youTubeClientService) {
+        this.youTubeClientService = youTubeClientService;
+    }
 
     @GetMapping("/")
     public ResponseEntity main() {
@@ -19,36 +34,34 @@ public class SocialMediaController {
         return ResponseEntity.ok("Success");
     }
 
+    @GetMapping("/YTchannels")
+    public ResponseEntity YouTubeChannels() {
+        return ResponseEntity.ok(youTubeChannelService.findAll());
+    }
+
     @GetMapping("/test")
     public ResponseEntity test() {
-        RestTemplate restTemplate = new RestTemplateBuilder().build();
-        YouTubeVideo video = restTemplate.getForObject("https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=UCq19-LqvG35A-30oyAiPiqA&key=AIzaSyBNl2SBp8Gw_0UXhchOQT2U0N3mJyEku44&maxResults=1",
-                YouTubeVideo.class);
+        YouTubeVideo video = youTubeClientService.getVideosFromChannel("UCq19-LqvG35A-30oyAiPiqA", 5);
         return ResponseEntity.ok(video);
     }
 
     @GetMapping("/posts")
     public ResponseEntity post(){
-        RestTemplate restTemplate = new RestTemplateBuilder().build();
-        YouTubeVideo video = restTemplate.getForObject("https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=UCq19-LqvG35A-30oyAiPiqA&key=AIzaSyBNl2SBp8Gw_0UXhchOQT2U0N3mJyEku44&maxResults=1",
-                YouTubeVideo.class);
+        ArrayList<SocialMediaPost> posts = new ArrayList<>(10);
 
-        return ResponseEntity.ok(new SocialMediaPost[] {
-                new SocialMediaPost(1L, "asd", "15.10.2020", "https://i.pinimg.com/originals/5e/c5/01/5ec50175139d39c8a69f0f8ce3233ea9.jpg", "", "sample",
-                        new String[] {"https://i.pinimg.com/originals/5e/c5/01/5ec50175139d39c8a69f0f8ce3233ea9.jpg",
-                                "https://i.pinimg.com/originals/5e/c5/01/5ec50175139d39c8a69f0f8ce3233ea9.jpg",
-                                "https://i.pinimg.com/originals/5e/c5/01/5ec50175139d39c8a69f0f8ce3233ea9.jpg"},new String[] {},new String[] {}),
-                new SocialMediaPost(2L, "dddaaasd", "16.10.2020", "https://i.pinimg.com/originals/5e/c5/01/5ec50175139d39c8a69f0f8ce3233ea9.jpg", "", "ksldfjghlksdfhl",
-                        new String[] {"https://i.pinimg.com/originals/5e/c5/01/5ec50175139d39c8a69f0f8ce3233ea9.jpg",
-                                "https://i.pinimg.com/originals/5e/c5/01/5ec50175139d39c8a69f0f8ce3233ea9.jpg",
-                                "https://i.pinimg.com/originals/5e/c5/01/5ec50175139d39c8a69f0f8ce3233ea9.jpg"},new String[] {},new String[] {}),
-                video.toSocialMediaPosts().get(0)
-        });
+        YouTubeVideo video = youTubeClientService.getVideosFromChannel("UCq19-LqvG35A-30oyAiPiqA", 10);
+
+        posts.addAll(video.toSocialMediaPosts());
+
+        return ResponseEntity.ok(posts);
     }
 
-    @Bean
-    public RestTemplate restTemplate(RestTemplateBuilder builder) {
-        return builder.build();
+    @GetMapping("/addYTchannel")
+    public String addYouTubeChannel(@RequestParam(name = "channelId", required = true) String channelId) {
+        YouTubeChannel newChannel = new YouTubeChannel(channelId);
+        youTubeChannelService.save(newChannel);
+        channels.add(newChannel);
+        return "success";
     }
 
 }
