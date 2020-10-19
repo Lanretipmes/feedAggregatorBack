@@ -1,6 +1,6 @@
 package com.feedaggregator.back.controllers;
 
-import com.feedaggregator.back.boundary.YouTubeVideo;
+import com.feedaggregator.back.boundary.YouTubeVideoBoundary;
 import com.feedaggregator.back.entity.YouTubeChannel;
 import com.feedaggregator.back.services.YouTubeChannelService;
 import com.feedaggregator.back.services.YouTubeClientService;
@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 
 @RestController
@@ -32,33 +33,35 @@ public class SocialMediaController {
         return ResponseEntity.ok("Success");
     }
 
-    @GetMapping("/subscription/youtube")
+    @GetMapping("/subscriptions/youtube")
     public ResponseEntity YouTubeChannels() {
-        return ResponseEntity.ok(youTubeChannelService.findAll());
+        List<YouTubeChannel> channels = youTubeChannelService.findAll();
+
+        if (channels != null)
+        return ResponseEntity.ok(channels);
+        else return ResponseEntity.ok("No channels found");
+
     }
 
     @GetMapping("/test")
     public ResponseEntity test() {
-        YouTubeVideo video = youTubeClientService.getVideosFromChannel("UCq19-LqvG35A-30oyAiPiqA", 5);
+        YouTubeVideoBoundary video = youTubeClientService.getVideosFromChannel("UCq19-LqvG35A-30oyAiPiqA", 5);
         return ResponseEntity.ok(video);
     }
 
     @GetMapping("/posts")
     public ResponseEntity post(){
         ArrayList<SocialMediaPost> posts = new ArrayList<>(10);
+        channels.addAll(youTubeChannelService.findAll());
 
-        YouTubeVideo video = youTubeClientService.getVideosFromChannel("UCq19-LqvG35A-30oyAiPiqA", 10);
-
-        posts.addAll(video.toSocialMediaPosts());
+        posts.addAll(youTubeClientService.getVideosFromSubscriptions(channels));
 
         return ResponseEntity.ok(posts);
     }
 
-    @RequestMapping(value = "/subscription/youtube", method = RequestMethod.POST)
-    public String addYouTubeChannel(@RequestBody String channelId) {
-        YouTubeChannel newChannel = new YouTubeChannel(channelId);
-        youTubeChannelService.save(newChannel);
-        channels.add(newChannel);
+    @RequestMapping(value = "/subscriptions/youtube", method = RequestMethod.POST)
+    public String addYouTubeChannel(@RequestBody String title) {
+        channels.add(youTubeClientService.addChannel(title));
         return "success";
     }
 

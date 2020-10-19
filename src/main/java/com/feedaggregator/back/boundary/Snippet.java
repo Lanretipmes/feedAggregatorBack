@@ -10,5 +10,6 @@ public class Snippet {
     private String description;
     private Thumbnails thumbnails;
     private String channelTitle;
+    private String channelId;
 
 }
