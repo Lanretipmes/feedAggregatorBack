@@ -1,17 +1,16 @@
 package com.feedaggregator.back.entity;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Data
 @Entity
 @Table(name = "youtubechannels")
 @NoArgsConstructor
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class YouTubeChannel {
 
     @Id
@@ -24,5 +23,12 @@ public class YouTubeChannel {
     @NonNull private String channelName;
     @Column(name = "avatarlink")
     @NonNull private String avatarLink;
+    @Column(name = "uploadsid")
+    @NonNull private String uploadsId;
+    @Column(name = "themeid")
+    @ManyToMany
+    @ToString.Exclude
+    @PrimaryKeyJoinColumn(name = "themeid")
+    private List<YouTubeChannelTheme> themeIds;
 
 }

@@ -7,6 +7,6 @@ import java.util.List;
 @Data
 public class YouTubeChannelBoundary {
 
-    private List<YouTubeChannelItem> items;
+    private List<Item> items;
 
 }

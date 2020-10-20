@@ -6,6 +6,7 @@ import lombok.Data;
 public class Item {
 
     private Snippet snippet;
-    private Id id;
+    private String id;
+    private ContentDetails contentDetails;
 
 }

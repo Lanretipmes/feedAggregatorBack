@@ -30,8 +30,8 @@ public class YouTubeClientService {
 
     public YouTubeVideoBoundary getVideosFromChannel (String channelId, int maxResults){
 
-        return restTemplate.getForObject("https://www.googleapis.com/youtube/v3/search?part=snippet&order=date&channelId="+ channelId +
-                "&key=" + key + "&maxResults=" + maxResults, YouTubeVideoBoundary.class);
+        return restTemplate.getForObject("https://www.googleapis.com/youtube/v3/playlistItems?playlistId="+ youTubeChannelService.getById(channelId).getUploadsId() +
+                "&key=" + key + "&maxResults=" + maxResults + "&part=snippet", YouTubeVideoBoundary.class);
 
     }
 
@@ -52,10 +52,14 @@ public class YouTubeClientService {
         YouTubeChannelBoundary channel;
         YouTubeChannel newChannel;
 
-        channel = restTemplate.getForObject("https://www.googleapis.com/youtube/v3/channels?part=snippet&forUsername=" + channelName +
+        channel = restTemplate.getForObject("https://www.googleapis.com/youtube/v3/channels?part=snippet&part=contentDetails&forUsername=" + channelName +
                 "&key=" + key + "&maxResults=" + 1, YouTubeChannelBoundary.class);
 
-        newChannel = new YouTubeChannel(channel.getItems().get(0).getId(), channelName, channel.getItems().get(0).getSnippet().getThumbnails().getDefaultThumb().getUrl());
+        newChannel = new YouTubeChannel(
+                channel.getItems().get(0).getId(), //channel id
+                channelName,
+                channel.getItems().get(0).getSnippet().getThumbnails().getDefaultThumb().getUrl(), //avatar link
+                channel.getItems().get(0).getContentDetails().getRelatedPlaylists().getUploads()); //uploads link
         youTubeChannelService.save(newChannel);
 
         return newChannel;
@@ -79,9 +83,9 @@ public class YouTubeClientService {
                     item.getSnippet().getPublishedAt(),
                     item.getSnippet().getTitle(),
                     avatarLink,
-                    YOUTUBE_DEFAULT_VIDEO_URL + item.getId().getVideoId(),
+                    YOUTUBE_DEFAULT_VIDEO_URL + item.getSnippet().getResourceId().getVideoId(),
                     item.getSnippet().getDescription(),
-                    new String[] { item.getSnippet().getThumbnails().getMedium().getUrl()},
+                    new String[] { item.getSnippet().getThumbnails().getMedium().getUrl()}, //source avatar
                     new String[] {},
                     new String[] {}));
         }
