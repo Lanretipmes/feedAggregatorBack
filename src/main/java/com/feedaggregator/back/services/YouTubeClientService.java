@@ -1,18 +1,12 @@
 package com.feedaggregator.back.services;
 
-import com.feedaggregator.back.boundary.Item;
-import com.feedaggregator.back.boundary.YouTubeChannelBoundary;
-import com.feedaggregator.back.boundary.YouTubeVideoBoundary;
-import com.feedaggregator.back.controllers.SocialMediaPost;
+import com.feedaggregator.back.dto.YouTubeChannelDTO;
+import com.feedaggregator.back.dto.YouTubeVideoDTO;
 import com.feedaggregator.back.entity.YouTubeChannel;
-import com.feedaggregator.back.entity.YouTubeChannelTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.LinkedList;
-import java.util.List;
 
 @Service
 public class YouTubeClientService {
@@ -22,7 +16,6 @@ public class YouTubeClientService {
     private RestTemplate restTemplate;
     private YouTubeChannelService youTubeChannelService;
     private YouTubeChannelThemeService youTubeChannelThemeService;
-    private static final String YOUTUBE_DEFAULT_VIDEO_URL = "https://www.youtube.com/watch?v=";
 
     @Autowired
     public YouTubeClientService (RestTemplate restTemplate, YouTubeChannelService youTubeChannelService, YouTubeChannelThemeService youTubeChannelThemeService){
@@ -31,32 +24,19 @@ public class YouTubeClientService {
         this.youTubeChannelThemeService = youTubeChannelThemeService;
     }
 
-    public YouTubeVideoBoundary getVideosFromChannel (String channelId, int maxResults){
+    public YouTubeVideoDTO getVideosFromChannel (String channelId, int maxResults){
 
         return restTemplate.getForObject("https://www.googleapis.com/youtube/v3/playlistItems?playlistId="+ youTubeChannelService.getById(channelId).getUploadsId() +
-                "&key=" + key + "&maxResults=" + maxResults + "&part=snippet", YouTubeVideoBoundary.class);
+                "&key=" + key + "&maxResults=" + maxResults + "&part=snippet", YouTubeVideoDTO.class);
 
-    }
-
-    public List<SocialMediaPost> getVideosFromCollection(List<YouTubeChannel> channels) {
-
-        LinkedList<SocialMediaPost> videos = new LinkedList<>();
-        YouTubeVideoBoundary video;
-
-        for (YouTubeChannel channel: channels) {
-            video = getVideosFromChannel(channel.getChannelId(), 5);
-            videos.addAll(toSocialMediaPosts(video));
-        }
-
-        return  videos;
     }
 
     public YouTubeChannel addChannel (String channelName) {
-        YouTubeChannelBoundary channel;
+        YouTubeChannelDTO channel;
         YouTubeChannel newChannel;
 
         channel = restTemplate.getForObject("https://www.googleapis.com/youtube/v3/channels?part=snippet&part=contentDetails&forUsername=" + channelName +
-                "&key=" + key + "&maxResults=" + 1, YouTubeChannelBoundary.class);
+                "&key=" + key + "&maxResults=" + 1, YouTubeChannelDTO.class);
 
         newChannel = new YouTubeChannel(
                 channel.getItems().get(0).getId(), //channel id
@@ -69,45 +49,4 @@ public class YouTubeClientService {
 
     }
 
-    public List<SocialMediaPost> toSocialMediaPosts(YouTubeVideoBoundary video) {
-        List<SocialMediaPost> posts = new LinkedList<SocialMediaPost>();
-        List<YouTubeChannel> channels = youTubeChannelService.findAll();
-        String avatarLink = "";
-
-        for (Item item: video.getItems()) {
-            for (YouTubeChannel channel: channels) {
-                if (channel.getChannelId().equals(item.getSnippet().getChannelId())) {
-                    avatarLink = channel.getAvatarLink();
-                    break;
-                }
-            }
-            posts.add(new SocialMediaPost(1L,
-                    item.getSnippet().getChannelTitle(),
-                    item.getSnippet().getPublishedAt(),
-                    item.getSnippet().getTitle(),
-                    avatarLink,
-                    YOUTUBE_DEFAULT_VIDEO_URL + item.getSnippet().getResourceId().getVideoId(),
-                    item.getSnippet().getDescription(),
-                    new String[] { item.getSnippet().getThumbnails().getMedium().getUrl()}, //source avatar
-                    new String[] {},
-                    new String[] {}));
-        }
-
-        return posts;
-    }
-
-    public void createYouTubeChannelTheme(String name, List<YouTubeChannel> channels){
-        if (channels == null)
-            channels = new LinkedList<>();
-
-        youTubeChannelThemeService.save(new YouTubeChannelTheme(name, channels));
-
-    }
-
-    public void addYouTubeChannelToTheme(YouTubeChannel channel, String themeName){
-
-        YouTubeChannelTheme theme = youTubeChannelThemeService.getByName(themeName);
-        theme.getChannels().add(channel);
-
-    }
 }

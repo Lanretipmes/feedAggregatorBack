@@ -1,4 +1,4 @@
-package com.feedaggregator.back.controllers;
+package com.feedaggregator.back.dto;
 
 import lombok.Data;
 import lombok.NonNull;

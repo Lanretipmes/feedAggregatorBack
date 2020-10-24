@@ -1,4 +1,4 @@
-package com.feedaggregator.back.boundary;
+package com.feedaggregator.back.dto;
 
 import lombok.Data;
 

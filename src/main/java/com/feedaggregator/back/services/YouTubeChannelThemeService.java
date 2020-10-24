@@ -1,11 +1,13 @@
 package com.feedaggregator.back.services;
 
+import com.feedaggregator.back.entity.YouTubeChannel;
 import com.feedaggregator.back.entity.YouTubeChannelTheme;
 import com.feedaggregator.back.repositories.YouTubeChannelThemeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.LinkedList;
 import java.util.List;
 
 @Service
@@ -16,12 +18,6 @@ public class YouTubeChannelThemeService {
     @Autowired
     public YouTubeChannelThemeService (YouTubeChannelThemeRepository youTubeChannelThemeRepository) {
         this.youTubeChannelThemeRepository = youTubeChannelThemeRepository;
-    }
-
-    @Transactional
-    public void save(YouTubeChannelTheme theme){
-        if (theme != null)
-            youTubeChannelThemeRepository.save(theme);
     }
 
     @Transactional
@@ -46,5 +42,20 @@ public class YouTubeChannelThemeService {
             }
         }
         return null;
+    }
+
+    public void createYouTubeChannelTheme(String name, List<YouTubeChannel> channels){
+        if (channels == null)
+            channels = new LinkedList<>();
+
+        youTubeChannelThemeRepository.save(new YouTubeChannelTheme(name, channels));
+
+    }
+
+    public void addYouTubeChannelToTheme(YouTubeChannel channel, String themeName){
+
+        YouTubeChannelTheme theme = getByName(themeName);
+        theme.getChannels().add(channel);
+
     }
 }

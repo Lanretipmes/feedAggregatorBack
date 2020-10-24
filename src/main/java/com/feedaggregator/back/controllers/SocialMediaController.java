@@ -1,10 +1,9 @@
 package com.feedaggregator.back.controllers;
 
-import com.feedaggregator.back.boundary.YouTubeVideoBoundary;
+import com.feedaggregator.back.dto.SocialMediaPost;
+import com.feedaggregator.back.dto.YouTubeVideoDTO;
 import com.feedaggregator.back.entity.YouTubeChannel;
-import com.feedaggregator.back.entity.YouTubeChannelTheme;
-import com.feedaggregator.back.services.YouTubeChannelService;
-import com.feedaggregator.back.services.YouTubeChannelThemeService;
+import com.feedaggregator.back.services.SocialMediaService;
 import com.feedaggregator.back.services.YouTubeClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,16 +19,14 @@ import java.util.List;
 public class SocialMediaController {
 
     private YouTubeClientService youTubeClientService;
-    private YouTubeChannelService youTubeChannelService;
-    private YouTubeChannelThemeService youTubeChannelThemeService;
+    private SocialMediaService mediaService;
     private LinkedList<YouTubeChannel> channels = new LinkedList<>();
     private ArrayList<SocialMediaPost> posts;
 
     @Autowired
-    public SocialMediaController (YouTubeClientService youTubeClientService, YouTubeChannelService youTubeChannelService, YouTubeChannelThemeService youTubeChannelThemeService) {
+    public SocialMediaController (YouTubeClientService youTubeClientService, SocialMediaService mediaService) {
         this.youTubeClientService = youTubeClientService;
-        this.youTubeChannelService = youTubeChannelService;
-        this.youTubeChannelThemeService = youTubeChannelThemeService;
+        this.mediaService = mediaService;
     }
 
     @GetMapping("/")
@@ -40,7 +37,7 @@ public class SocialMediaController {
 
     @GetMapping("/subscriptions/youtube")
     public ResponseEntity YouTubeChannels() {
-        List<YouTubeChannel> channels = youTubeChannelService.findAll();
+        List<YouTubeChannel> channels = mediaService.getYouTubeChannels();
 
         if (channels != null)
         return ResponseEntity.ok(channels);
@@ -50,16 +47,16 @@ public class SocialMediaController {
 
     @GetMapping("/test")
     public ResponseEntity test() {
-        YouTubeVideoBoundary video = youTubeClientService.getVideosFromChannel("UCq19-LqvG35A-30oyAiPiqA", 5);
+        YouTubeVideoDTO video = youTubeClientService.getVideosFromChannel("UCq19-LqvG35A-30oyAiPiqA", 5);
         return ResponseEntity.ok(video);
     }
 
     @GetMapping("/posts/all")
     public ResponseEntity post(){
         posts = new ArrayList<>(10);
-        channels.addAll(youTubeChannelService.findAll());
+        channels.addAll(mediaService.getYouTubeChannels());
 
-        posts.addAll(youTubeClientService.getVideosFromCollection(channels));
+        posts.addAll(mediaService.getVideosFromCollection(channels));
 
         return ResponseEntity.ok(posts);
     }
@@ -72,9 +69,9 @@ public class SocialMediaController {
 
     @GetMapping("/posts/youtube/themes/{themeName}")
     public ResponseEntity getThemedYouTubeVideos(@RequestBody String themeName){
-        YouTubeChannelTheme theme = youTubeChannelThemeService.getByName(themeName);
+
         posts = new ArrayList<>(10);
-        posts.addAll(youTubeClientService.getVideosFromCollection(theme.getChannels()));
+        posts.addAll(mediaService.getThemedVideos(themeName));
 
         return ResponseEntity.ok(posts);
 
