@@ -5,6 +5,7 @@ import com.feedaggregator.back.boundary.YouTubeChannelBoundary;
 import com.feedaggregator.back.boundary.YouTubeVideoBoundary;
 import com.feedaggregator.back.controllers.SocialMediaPost;
 import com.feedaggregator.back.entity.YouTubeChannel;
+import com.feedaggregator.back.entity.YouTubeChannelTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,12 +21,14 @@ public class YouTubeClientService {
     private String key;
     private RestTemplate restTemplate;
     private YouTubeChannelService youTubeChannelService;
+    private YouTubeChannelThemeService youTubeChannelThemeService;
     private static final String YOUTUBE_DEFAULT_VIDEO_URL = "https://www.youtube.com/watch?v=";
 
     @Autowired
-    public YouTubeClientService (RestTemplate restTemplate, YouTubeChannelService youTubeChannelService){
+    public YouTubeClientService (RestTemplate restTemplate, YouTubeChannelService youTubeChannelService, YouTubeChannelThemeService youTubeChannelThemeService){
         this.restTemplate = restTemplate;
         this.youTubeChannelService = youTubeChannelService;
+        this.youTubeChannelThemeService = youTubeChannelThemeService;
     }
 
     public YouTubeVideoBoundary getVideosFromChannel (String channelId, int maxResults){
@@ -35,7 +38,7 @@ public class YouTubeClientService {
 
     }
 
-    public List<SocialMediaPost> getVideosFromSubscriptions (List<YouTubeChannel> channels) {
+    public List<SocialMediaPost> getVideosFromCollection(List<YouTubeChannel> channels) {
 
         LinkedList<SocialMediaPost> videos = new LinkedList<>();
         YouTubeVideoBoundary video;
@@ -93,4 +96,18 @@ public class YouTubeClientService {
         return posts;
     }
 
+    public void createYouTubeChannelTheme(String name, List<YouTubeChannel> channels){
+        if (channels == null)
+            channels = new LinkedList<>();
+
+        youTubeChannelThemeService.save(new YouTubeChannelTheme(name, channels));
+
+    }
+
+    public void addYouTubeChannelToTheme(YouTubeChannel channel, String themeName){
+
+        YouTubeChannelTheme theme = youTubeChannelThemeService.getByName(themeName);
+        theme.getChannels().add(channel);
+
+    }
 }

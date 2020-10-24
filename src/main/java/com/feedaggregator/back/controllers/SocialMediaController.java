@@ -2,7 +2,9 @@ package com.feedaggregator.back.controllers;
 
 import com.feedaggregator.back.boundary.YouTubeVideoBoundary;
 import com.feedaggregator.back.entity.YouTubeChannel;
+import com.feedaggregator.back.entity.YouTubeChannelTheme;
 import com.feedaggregator.back.services.YouTubeChannelService;
+import com.feedaggregator.back.services.YouTubeChannelThemeService;
 import com.feedaggregator.back.services.YouTubeClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,12 +21,15 @@ public class SocialMediaController {
 
     private YouTubeClientService youTubeClientService;
     private YouTubeChannelService youTubeChannelService;
+    private YouTubeChannelThemeService youTubeChannelThemeService;
     private LinkedList<YouTubeChannel> channels = new LinkedList<>();
+    private ArrayList<SocialMediaPost> posts;
 
     @Autowired
-    public SocialMediaController (YouTubeClientService youTubeClientService, YouTubeChannelService youTubeChannelService) {
+    public SocialMediaController (YouTubeClientService youTubeClientService, YouTubeChannelService youTubeChannelService, YouTubeChannelThemeService youTubeChannelThemeService) {
         this.youTubeClientService = youTubeClientService;
         this.youTubeChannelService = youTubeChannelService;
+        this.youTubeChannelThemeService = youTubeChannelThemeService;
     }
 
     @GetMapping("/")
@@ -49,12 +54,12 @@ public class SocialMediaController {
         return ResponseEntity.ok(video);
     }
 
-    @GetMapping("/posts")
+    @GetMapping("/posts/all")
     public ResponseEntity post(){
-        ArrayList<SocialMediaPost> posts = new ArrayList<>(10);
+        posts = new ArrayList<>(10);
         channels.addAll(youTubeChannelService.findAll());
 
-        posts.addAll(youTubeClientService.getVideosFromSubscriptions(channels));
+        posts.addAll(youTubeClientService.getVideosFromCollection(channels));
 
         return ResponseEntity.ok(posts);
     }
@@ -63,6 +68,16 @@ public class SocialMediaController {
     public String addYouTubeChannel(@RequestBody String title) {
         channels.add(youTubeClientService.addChannel(title));
         return "success";
+    }
+
+    @GetMapping("/posts/youtube/themes/{themeName}")
+    public ResponseEntity getThemedYouTubeVideos(@RequestBody String themeName){
+        YouTubeChannelTheme theme = youTubeChannelThemeService.getByName(themeName);
+        posts = new ArrayList<>(10);
+        posts.addAll(youTubeClientService.getVideosFromCollection(theme.getChannels()));
+
+        return ResponseEntity.ok(posts);
+
     }
 
 }

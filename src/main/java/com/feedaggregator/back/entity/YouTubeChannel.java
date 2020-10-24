@@ -25,10 +25,10 @@ public class YouTubeChannel {
     @NonNull private String avatarLink;
     @Column(name = "uploadsid")
     @NonNull private String uploadsId;
-    @Column(name = "themeid")
+    @Column(name = "themes")
     @ManyToMany
     @ToString.Exclude
-    @PrimaryKeyJoinColumn(name = "themeid")
-    private List<YouTubeChannelTheme> themeIds;
+    @PrimaryKeyJoinColumn(name = "themename")
+    private List<YouTubeChannelTheme> themes;
 
 }

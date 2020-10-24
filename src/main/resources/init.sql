@@ -5,12 +5,13 @@ create table YouTubeChannels
     channelName VARCHAR(100) not null,
     avatarLink VARCHAR(100) not null,
     uploadsId VARCHAR(100) not null,
-    themeId SERIAL references YouTubeChannelThemes
+    themes VARCHAR[]
 );
 
 create table YouTubeChannelThemes
 (
-    id  SERIAL PRIMARY KEY,
-    themeName VARCHAR(100) not null,
-    channelId SERIAL references YouTubeChannels
+
+    themeName VARCHAR(100) PRIMARY KEY,
+    channelIds INT[]
+
 )

@@ -10,17 +10,15 @@ import java.util.List;
 @Table(name = "youtubechannelthemes")
 @NoArgsConstructor
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class YouTubeChannelTheme {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private long id;
     @Column(name = "themename")
     @NonNull private String themeName;
     @ManyToMany
     @ToString.Exclude
-    @PrimaryKeyJoinColumn(name = "channelid")
-    private List<YouTubeChannel> channels;
+    @PrimaryKeyJoinColumn(name = "channelids")
+    //@JoinTable()
+    @NonNull private List<YouTubeChannel> channels;
 
 }
