@@ -31,6 +31,10 @@ public class YouTubeClientService {
 
     }
 
+    // I would break this up again
+    // Make a method "resolveChannelByName(String name)"
+    // and have the YouTubeChannelService call it
+    // Remember: Client is lowest in hierarchy and does not get any services!
     public YouTubeChannel addChannel (String channelName) {
         YouTubeChannelDTO channel;
         YouTubeChannel newChannel;

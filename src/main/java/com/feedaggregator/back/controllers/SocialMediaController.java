@@ -20,6 +20,8 @@ public class SocialMediaController {
 
     private YouTubeClientService youTubeClientService;
     private SocialMediaService mediaService;
+    // Avoid using subtypes. Always work on the supertype (Collection). Makes it easier.
+    // If you use a subtype explicity, comment it for your fellow developers
     private LinkedList<YouTubeChannel> channels = new LinkedList<>();
     private ArrayList<SocialMediaPost> posts;
 
@@ -53,11 +55,13 @@ public class SocialMediaController {
 
     @GetMapping("/posts/all")
     public ResponseEntity post(){
-        posts = new ArrayList<>(10);
-        channels.addAll(mediaService.getYouTubeChannels());
-
-        posts.addAll(mediaService.getVideosFromCollection(channels));
-
+        // Technical note: You should avoid using class global variables
+        // Technically it is no problem, since you get one instance per requests, but it's meh.
+        // Suggestions below
+        // Also. No need to instantiates arrays manually, really
+        // Also. Maybe wrap this logic into a method in your service!
+        List<YouTubeChannel> channels = mediaService.getYouTubeChannels();
+        List<SocialMediaPost> posts = mediaService.getVideosFromCollection(channels);
         return ResponseEntity.ok(posts);
     }
 

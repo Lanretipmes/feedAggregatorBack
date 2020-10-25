@@ -37,14 +37,19 @@ public class YouTubeChannelService {
         return youTubeChannelRepository.findAll();
     }
 
+    // Maybe name it getByChannelId
     public YouTubeChannel getById(String channelId) {
-
-        for (YouTubeChannel channel: findAll()) {
-            if (channel.getChannelId().equals(channelId))
-                return channel;
-        }
-
-        return null;
+        // Suggestions
+        return findAll().stream()
+                .filter(youTubeChannel -> youTubeChannel.getChannelId().equals(channelId))
+                .findAny()
+                .orElse(null);
+//        for (YouTubeChannel channel: findAll()) {
+//            if (channel.getChannelId().equals(channelId))
+//                return channel;
+//        }
+//
+//        return null;
     }
 
 }
