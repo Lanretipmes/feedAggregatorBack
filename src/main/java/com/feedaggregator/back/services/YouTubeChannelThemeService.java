@@ -36,6 +36,8 @@ public class YouTubeChannelThemeService {
 
     public YouTubeChannelTheme getByName(String name){
 
+        // This is fine for now, but keep in mind that getting all might take ages on a larger database
+        // I will leave a suggestion on the repo
         for (YouTubeChannelTheme theme :youTubeChannelThemeRepository.findAll()) {
             if (theme.getThemeName().equals(name)) {
                 return theme;

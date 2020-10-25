@@ -32,12 +32,17 @@ public class SocialMediaService {
         String avatarLink = "";
 
         for (Item item: video.getItems()) {
+            // Maybe move this into a method findAvatar().
+            // Split up your code so you can grasp it by looking at it
             for (YouTubeChannel channel: channels) {
                 if (channel.getChannelId().equals(item.getSnippet().getChannelId())) {
                     avatarLink = channel.getAvatarLink();
                     break;
                 }
             }
+            // Same here. Maybe do something like:
+            // posts.add(toSocialMediaPosts(item))
+            // Makes it much more readable!
             posts.add(new SocialMediaPost(1L,
                     item.getSnippet().getChannelTitle(),
                     item.getSnippet().getPublishedAt(),
@@ -58,15 +63,13 @@ public class SocialMediaService {
     }
 
     public List<SocialMediaPost> getVideosFromCollection(List<YouTubeChannel> channels) {
-
+        // Again, use collection interface
         LinkedList<SocialMediaPost> videos = new LinkedList<>();
-        YouTubeVideoDTO video;
-
         for (YouTubeChannel channel: channels) {
-            video = clientService.getVideosFromChannel(channel.getChannelId(), 5);
+            // No need to leave unitialized variables laying around
+            YouTubeVideoDTO video = clientService.getVideosFromChannel(channel.getChannelId(), 5);
             videos.addAll(toSocialMediaPosts(video));
         }
-
         return  videos;
     }
 
